@@ -14,17 +14,18 @@ clear
 movement=$(($RANDOM%51+50))
 life=0
 attack=0
+defense=0
 monsters=('Skeleton' 'Goblin' 'Troll')
 
 ##### SET LIFE #####
-set_life () {
+function set_life () {
   for i in $(seq 1 $1); do
     life=$(($life+$RANDOM%6+1))
   done
 }
 
 ##### MOVEMENT #####
-move () {
+function move () {
   local move=0
 
   for i in $(seq 1 2)
@@ -36,7 +37,7 @@ move () {
 }
 
 ##### SELECT YOUR PLAYER #####
-player () {
+function player () {
   echo " __"
   echo "(_  _ | _  __|_    _    ._ ._ | _.   _ ._"
   echo "__)(/_|(/_(_ |_ \/(_)|_||  |_)|(_|\/(/_|"
@@ -54,18 +55,21 @@ player () {
       echo "You select the BARBARIAN"
       set_life 4
       attack=2
+      defense=4
     ;;
 
     2)
       echo "You select the ASSASSIN"
       set_life 2
       attack=3
+      defense=2
     ;;
 
     3)
       echo "You select the PARIAH. Get ready to SUFFER!!!"
       set_life 1
       attack=1
+      defense=1
     ;;
 
     0)
@@ -80,7 +84,7 @@ player () {
 }
 
 ##### DASHBOARD #####
-dashboard () {
+function dashboard () {
   echo "######################################################"
   echo "#                          |                         #"
   echo "#           Steps          |           Life          #"
@@ -89,34 +93,28 @@ dashboard () {
   echo "######################################################"
 }
 
-##### ATTACK #####
-attack () {
-  local attack=0
+##### THROW DICE #####
+function throw_dice () {
+  local total=0
 
   for i in $(seq 1 $1); do
-    attack=$attack+$i
+    total=$(($total+$RANDOM%6+1))
   done
 
-  echo $attack
-}
-
-##### DEFENSE #####
-defense () {
-  local defense=0
-
-  for i in $(seq 1 $1); do
-    defense=$defense+$i
-  done
-
-  echo $defense
+  echo $total
 }
 
 ##### COMBAT #####
-combat () {
+function combat () {
   local monster_attack=0
   local monster_defense=0
   local monster_life=1
   local first_defense=1
+  local current_attack=0
+  local current_monster_attack=0
+  local current_defense=0
+  local current_monster_defense=0
+  local damage=0
 
   case $1 in
     0) # Skeleton
@@ -133,21 +131,46 @@ combat () {
       monster_attack=3
       monster_defense=2
     ;;
+
+    3)
+      monster_attack=4
+      monster_defense=4
+    ;;
   esac
 
-  while [ $monster_life -ne 0 || $life -ne 0 ]; do
+  while [ $monster_life -ne 0 ] && [ $life -gt 0 ]; do
     echo "1) Attack"
     echo "2) Defense"
     
-    read -n 1 -s -p mode
+    read -n 1 -s mode
 
     case $mode in
       1)
-        local current_attack=$(attack)
+        current_attack=$(throw_dice $attack)
+        current_monster_defense=$(throw_dice $monster_defense)
+
+        if [ $current_attack -gt $current_monster_defense ]; then
+          monster_life=0
+          echo "You kill the ${monsters[$1]}."
+        elif [ $current_attack -eq $current_monster_defense ]; then
+          echo "It was a tie."
+        else 
+          current_monster_attack=$(throw_dice $monster_attack)
+          current_defense=$(throw_dice $defense)
+
+          damage=$(($current_monster_attack-$current_defense))
+          life=$(($life-$damage))
+          echo "The ${monsters[$1]} defense. Ready to counter."
+        fi
       ;;
 
       2)
+        if [ $first_defense -eq 1 ]; then
+          defense=$(($defense+1))
+        fi
 
+        current_monster_attack=$(throw_dice $monster_attack)
+        current_defense=$(throw_dice $defense)
       ;;
     esac
   done
@@ -170,6 +193,7 @@ while true; do
 
     if [ $boss -eq 0 ]; then
       echo "Shrek appeared. BE CAREFUL!!"
+      combat 3
     fi
 
   elif [ $combat_prob -eq 0 ]; then
