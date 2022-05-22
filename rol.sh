@@ -11,7 +11,7 @@
 clear
 
 ##### VARIABLES #####
-movement=$(($RANDOM%51+50))
+movement=5
 life=0
 attack=0
 defense=0
@@ -132,13 +132,14 @@ function combat () {
       monster_defense=2
     ;;
 
-    3)
+    3) # Boss
       monster_attack=4
       monster_defense=4
     ;;
   esac
 
   while [ $monster_life -ne 0 ] && [ $life -gt 0 ]; do
+    dashboard
     echo "1) Attack"
     echo "2) Defense"
     
@@ -151,7 +152,13 @@ function combat () {
 
         if [ $current_attack -gt $current_monster_defense ]; then
           monster_life=0
-          echo "You kill the ${monsters[$1]}."
+
+          if [ $1 -ne 3 ]; then
+            echo "You kill the ${monsters[$1]}."
+          else
+            echo "You kill Shrek."
+          fi
+          
         elif [ $current_attack -eq $current_monster_defense ]; then
           echo "It was a tie."
         else 
@@ -159,28 +166,86 @@ function combat () {
           current_defense=$(throw_dice $defense)
 
           damage=$(($current_monster_attack-$current_defense))
-          life=$(($life-$damage))
-          echo "The ${monsters[$1]} defense. Ready to counter."
+
+          if [ $1 -ne 3 ]; then
+            echo "The ${monsters[$1]} defended. Ready to counter."
+            sleep 1
+
+            if [ $damage -gt 0 ]; then
+              echo "You received $damage damage."
+              life=$(($life-$damage))
+            else
+              echo "You avoid damage."
+            fi
+          else
+            echo "Shrek defended. Ready to counter."
+
+            sleep 1
+
+            if [ $damage -gt 0 ]; then
+              echo "You received $damage damage."
+              life=$(($life-$damage))
+            else
+              echo "You avoid damage."
+            fi
+          fi
         fi
+
+        sleep 1
+        clear
       ;;
 
       2)
         if [ $first_defense -eq 1 ]; then
           defense=$(($defense+1))
+          first_defense=0
+          echo "You got an extra defense dice"
+          sleep 1
+        else
+          defense=$(($defense-1))
         fi
 
+        echo "Trying to defend."
+        sleep 1
         current_monster_attack=$(throw_dice $monster_attack)
         current_defense=$(throw_dice $defense)
+
+        damage=$(($current_monster_attack-$current_defense))
+
+        if [ $damage -gt 0 ]; then
+          echo "You get $damage damage."
+          life=$(($life-$damage))
+        else
+          echo "You defended yourself."
+        fi
+        sleep 1
+        clear
       ;;
     esac
+
+    if [ $life -le 0 ]; then
+      echo "▓██   ██▓ ▒█████   █    ██    ▓█████▄  ██▓▓█████ ▓█████▄ ";
+      echo " ▒██  ██▒▒██▒  ██▒ ██  ▓██▒   ▒██▀ ██▌▓██▒▓█   ▀ ▒██▀ ██▌";
+      echo "  ▒██ ██░▒██░  ██▒▓██  ▒██░   ░██   █▌▒██▒▒███   ░██   █▌";
+      echo "  ░ ▐██▓░▒██   ██░▓▓█  ░██░   ░▓█▄   ▌░██░▒▓█  ▄ ░▓█▄   ▌";
+      echo "  ░ ██▒▓░░ ████▓▒░▒▒█████▓    ░▒████▓ ░██░░▒████▒░▒████▓ ";
+      echo "   ██▒▒▒ ░ ▒░▒░▒░ ░▒▓▒ ▒ ▒     ▒▒▓  ▒ ░▓  ░░ ▒░ ░ ▒▒▓  ▒ ";
+      echo " ▓██ ░▒░   ░ ▒ ▒░ ░░▒░ ░ ░     ░ ▒  ▒  ▒ ░ ░ ░  ░ ░ ▒  ▒ ";
+      echo " ▒ ▒ ░░  ░ ░ ░ ▒   ░░░ ░ ░     ░ ░  ░  ▒ ░   ░    ░ ░  ░ ";
+      echo " ░ ░         ░ ░     ░           ░     ░     ░  ░   ░    ";
+      echo " ░ ░                           ░                  ░      ";
+      exit 0
+    fi
   done
+
+  first_defense=1
 }
 
 ##### MAIN #####
 player
 
 while true; do
-  sleep 2
+  sleep 1
   clear
   dashboard
   read -n 1 -s -p "Press Enter to move..."
@@ -190,20 +255,51 @@ while true; do
 
   if [ $movement -le 0 ]; then
     boss=$(($RANDOM%2))
+    movement=0
 
     if [ $boss -eq 0 ]; then
       echo "Shrek appeared. BE CAREFUL!!"
+      sleep 1
+      clear
       combat 3
     fi
 
   elif [ $combat_prob -eq 0 ]; then
     random_monster=$(($RANDOM%3))
     echo "A ${monsters[$random_monster]} has appeared"
+    sleep 1
+    clear
     combat $random_monster
   fi
 
   if [ $movement -le 0 ]; then
-    echo "You escape from the castle. You WIN!!"
+    echo "You escape from the castle."
+    sleep 1
+    echo " ▄         ▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄         ▄ "
+    echo "▐░▌       ▐░▌▐░░░░░░░░░░░▌▐░▌       ▐░▌"
+    echo "▐░▌       ▐░▌▐░█▀▀▀▀▀▀▀█░▌▐░▌       ▐░▌"
+    echo "▐░▌       ▐░▌▐░▌       ▐░▌▐░▌       ▐░▌"
+    echo "▐░█▄▄▄▄▄▄▄█░▌▐░▌       ▐░▌▐░▌       ▐░▌"
+    echo "▐░░░░░░░░░░░▌▐░▌       ▐░▌▐░▌       ▐░▌"
+    echo " ▀▀▀▀█░█▀▀▀▀ ▐░▌       ▐░▌▐░▌       ▐░▌"
+    echo "     ▐░▌     ▐░▌       ▐░▌▐░▌       ▐░▌"
+    echo "     ▐░▌     ▐░█▄▄▄▄▄▄▄█░▌▐░█▄▄▄▄▄▄▄█░▌"
+    echo "     ▐░▌     ▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌"
+    echo "      ▀       ▀▀▀▀▀▀▀▀▀▀▀  ▀▀▀▀▀▀▀▀▀▀▀ "
+    echo "                                       "
+    echo " ▄         ▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄        ▄ "
+    echo "▐░▌       ▐░▌▐░░░░░░░░░░░▌▐░░▌      ▐░▌"
+    echo "▐░▌       ▐░▌ ▀▀▀▀█░█▀▀▀▀ ▐░▌░▌     ▐░▌"
+    echo "▐░▌       ▐░▌     ▐░▌     ▐░▌▐░▌    ▐░▌"
+    echo "▐░▌   ▄   ▐░▌     ▐░▌     ▐░▌ ▐░▌   ▐░▌"
+    echo "▐░▌  ▐░▌  ▐░▌     ▐░▌     ▐░▌  ▐░▌  ▐░▌"
+    echo "▐░▌ ▐░▌░▌ ▐░▌     ▐░▌     ▐░▌   ▐░▌ ▐░▌"
+    echo "▐░▌▐░▌ ▐░▌▐░▌     ▐░▌     ▐░▌    ▐░▌▐░▌"
+    echo "▐░▌░▌   ▐░▐░▌ ▄▄▄▄█░█▄▄▄▄ ▐░▌     ▐░▐░▌"
+    echo "▐░░▌     ▐░░▌▐░░░░░░░░░░░▌▐░▌      ▐░░▌"
+    echo " ▀▀       ▀▀  ▀▀▀▀▀▀▀▀▀▀▀  ▀        ▀▀ "
+    echo "                                       "
+
     exit 0
   elif [ $life -le 0 ]; then
     echo "You died"
