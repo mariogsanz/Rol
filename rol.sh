@@ -307,8 +307,5 @@ while true; do
     echo "                                       "
 
     exit 0
-  elif [ $life -le 0 ]; then
-    echo "You died"
-    exit 0
   fi
 done

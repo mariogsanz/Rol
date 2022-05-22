@@ -23,4 +23,6 @@ When you are ready to go out of the castle, there is a 50% chance of find the bo
 When you entered in a combat, you can attack or deffend. On your first defense move, you got an extra defense's dice.
 Then the monster will try to attack you. If its attack is greater than your defense, you will get damage. Else you will avoid it.
 
-It works the same if you select to attack, if your attack is greater than the monster's defense, you will kill the monster. Else if the monster's defense is greater than your attack
+It works the same if you select to attack, if your attack is greater than the monster's defense, you will kill the monster. Else if the monster's defense is greater than your attack, the monster will avoid your attack and will counter it, which means that you can get damage.
+
+The game ends when you got out of the castle and you wins, or you get defeated by a monster and you died.
