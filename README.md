@@ -17,7 +17,7 @@ There are 3 types of monsters:
 
 Every monster you encounter will have only 1 point of life, which means that you only need to hit them only once.
 
-When you are ready to go out of the castle, there is a 50% chance of find the boss of the castle, that is **SHREK**.
+When you are ready to go out of the castle, there is a 50% chance of find the boss of the castle, **SHREK**.
 **SHREK** is the final monster of the castle and the most difficult one. It has 4 dices of defense and attack. He only can appear on the last turn.
 
 When you entered in a combat, you can attack or deffend. On your first defense move, you got an extra defense's dice.
